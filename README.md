@@ -1,6 +1,6 @@
 # Ratex
 
-TODO: Write a gem description
+You can write TeX in Ruby!
 
 ## Installation
 
@@ -18,7 +18,23 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+puts Ratex.calc{ f(x, y, t) == 2 * sin(pi / 4 * sqrt(x ** 2 + y ** 2) - pi / 2 * t) }
+```
+
+![enter image description here][1]
+
+```ruby
+puts calc{ f[n] == f[n - 2] + f[n - 1] }
+```
+
+![enter image description here][2]
+
+```ruby
+puts calc{ f(x, y) == sum(i == -1, h, a_i(x, y) * g_i(x, y)) }
+```
+
+![enter image description here][3]
 
 ## Contributing
 
@@ -27,3 +43,8 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+
+  [1]: fig1.png
+  [2]: fig2.png
+  [3]: fig3.png
