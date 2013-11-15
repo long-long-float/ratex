@@ -3,7 +3,7 @@ require "ratex/version"
 module Ratex
     extend self
 
-    OPERATORS = [:+, :-, :*, :/, :==, :+@, :-@]
+    OPERATORS = [:+, :-, :*, :/, :**, :==, :+@, :-@, :<, :>]
     KLASSES = [Fixnum, String, Symbol]
 
     ('A'..'Z').each do |c|
@@ -76,7 +76,7 @@ module Ratex
 
         [:pi, :theta].each do |keyword|
             define_method(keyword) do
-                "\\#calcword}"
+                "\\#{keyword}"
             end
         end
 
@@ -96,8 +96,16 @@ module Ratex
             "(#{expr})!"
         end
 
-        def b(expr)
+        def b1(expr)
             "(#{expr})"
+        end
+
+        def b2(expr)
+            "{#{expr}}"
+        end
+
+        def b3(expr)
+            "[#{expr}]"
         end
 
         [:sin, :cos, :tan].each do |func|
@@ -109,7 +117,7 @@ module Ratex
         end
 
         def [](expr)
-            "[#{expr.to_s}]"
+            "aaa[#{expr}]"
         end
 
         def method_missing(name, *args)
