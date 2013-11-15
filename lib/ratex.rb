@@ -6,7 +6,11 @@ module Ratex
     OPERATORS = [:+, :-, :*, :/, :==, :+@, :-@]
     KLASSES = [Fixnum, String, Symbol]
 
-    def begin_calc
+    ('A'..'Z').each do |c|
+        const_set(c, c)
+    end
+
+    def begin_generate
         KLASSES.each do |klass|
             klass.class_eval do
                 OPERATORS.each do |ope|
@@ -47,7 +51,7 @@ module Ratex
         end
     end
 
-    def end_calc
+    def end_generate
         KLASSES.each do |klass|
             klass.class_eval do
                 OPERATORS.each do |ope|
@@ -63,15 +67,15 @@ module Ratex
     class Context
 
         def out_of_calc
-            end_calc
+            end_generate
             ret = yield
-            begin_calc
+            begin_generate
             ret
         end
 
         [:pi, :theta].each do |keyword|
             define_method(keyword) do
-                "\\#{keyword}"
+                "\\#calcword}"
             end
         end
 
@@ -122,13 +126,13 @@ module Ratex
         end
     end
 
-    def calc(&block)
-        begin_calc
+    def generate(&block)
+        begin_generate
 
         context = Context.new
         ret = context.instance_eval(&block).to_s
         
-        end_calc
+        end_generate
         
         "$$" + ret + "$$"
     end
