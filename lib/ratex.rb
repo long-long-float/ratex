@@ -24,6 +24,7 @@ module Ratex
                         "#{self} #{ope} #{other}"
                     end
                 end
+
                 def **(other)
                     "#{self} ^{#{other}}"
                 end
@@ -105,6 +106,10 @@ module Ratex
                     "\\#{func}(#{expr})"
                 end
             end
+        end
+
+        def [](expr)
+            "[#{expr.to_s}]"
         end
 
         def method_missing(name, *args)

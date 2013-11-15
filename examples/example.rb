@@ -2,6 +2,7 @@ require 'ratex'
 include Ratex
 
 puts generate{ V == R * I }
+puts generate{ V == [R * I]}
 puts generate{ f(x, y) == x * y }
 puts generate{ f(x, y, t) == 2 * sin(pi / 4 * sqrt(x ** 2 + y ** 2) - pi / 2 * t) }
 puts generate{ n! == n * fact(n - 1) }
