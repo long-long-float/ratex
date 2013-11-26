@@ -117,7 +117,7 @@ module Ratex
         end
 
         def [](expr)
-            "aaa[#{expr}]"
+            "[#{expr}]"
         end
 
         def method_missing(name, *args)
