@@ -10,62 +10,62 @@ module Ratex
         const_set(c, c)
     end
 
-    def begin_generate
-        KLASSES.each do |klass|
-            klass.class_eval do
-                OPERATORS.each do |ope|
-                    if method_defined? ope
-                        alias_method "#{ope}_", ope
-                    end
-                end
-
-                [:+, :-, :<, :>].each do |ope|
-                    define_method(ope) do |other|
-                        "#{self} #{ope} #{other}"
-                    end
-                end
-
-                def **(other)
-                    "#{self} ^{#{other}}"
-                end
-
-                def *(other)
-                    "#{self} #{other}"
-                end
-
-                def /(other)
-                    "\\frac{#{self}}{#{other}}"
-                end
-
-                def +@
-                    "+#{self}"
-                end
-
-                def -@
-                    "-#{self}"
-                end
-
-                def ==(other)
-                    "#{self} = #{other}"
-                end
-            end
-        end
-    end
-
-    def end_generate
-        KLASSES.each do |klass|
-            klass.class_eval do
-                OPERATORS.each do |ope|
-                    remove_method ope
-                    if method_defined? "#{ope}_"
-                        alias_method ope, "#{ope}_"
-                    end
-                end
-            end
-        end
-    end
-
     class Context
+
+        def begin_generate
+            KLASSES.each do |klass|
+                klass.class_eval do
+                    OPERATORS.each do |ope|
+                        if method_defined? ope
+                            alias_method "#{ope}_", ope
+                        end
+                    end
+
+                    [:+, :-, :<, :>].each do |ope|
+                        define_method(ope) do |other|
+                            "#{self} #{ope} #{other}"
+                        end
+                    end
+
+                    def **(other)
+                        "#{self} ^{#{other}}"
+                    end
+
+                    def *(other)
+                        "#{self} #{other}"
+                    end
+
+                    def /(other)
+                        "\\frac{#{self}}{#{other}}"
+                    end
+
+                    def +@
+                        "+#{self}"
+                    end
+
+                    def -@
+                        "-#{self}"
+                    end
+
+                    def ==(other)
+                        "#{self} = #{other}"
+                    end
+                end
+            end
+        end
+
+        def end_generate
+            KLASSES.each do |klass|
+                klass.class_eval do
+                    OPERATORS.each do |ope|
+                        remove_method ope
+                        if method_defined? "#{ope}_"
+                            alias_method ope, "#{ope}_"
+                        end
+                    end
+                end
+            end
+        end
 
         def out_of_calc
             end_generate
@@ -126,7 +126,14 @@ module Ratex
 
         def method_missing(name, *args)
             #out_of_calc do
-            end_generate
+            begin
+                end_generate
+            rescue SystemStackError
+                puts name
+                puts $!
+                puts caller[0..100]
+                raise 10
+            end
                 ret = name.to_s
 
                 if args.size != 0
