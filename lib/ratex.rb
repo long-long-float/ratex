@@ -81,9 +81,11 @@ module Ratex
         end
 
         def sqrt(expr, n = 2)
-            out_of_calc do
+            #out_of_calc do
+            end_generate
                 "\\sqrt" + ((n != 2)? "[#{n}]" : "") + "{#{expr.to_s}}"
-            end
+            #end
+            begin_generate
         end
 
         def sum(init, max, expr)
@@ -110,9 +112,11 @@ module Ratex
 
         [:sin, :cos, :tan].each do |func|
             define_method(func) do |expr|
-                out_of_calc do
+                #out_of_calc do
+                end_generate
                     "\\#{func}(#{expr})"
-                end
+                #end
+                begin_generate
             end
         end
 
@@ -121,7 +125,8 @@ module Ratex
         end
 
         def method_missing(name, *args)
-            out_of_calc do
+            #out_of_calc do
+            end_generate
                 ret = name.to_s
 
                 if args.size != 0
@@ -135,7 +140,8 @@ module Ratex
                 end
 
                 ret
-            end
+            #end
+            begin_generate
         end
     end
 
