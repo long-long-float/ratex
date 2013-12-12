@@ -3,16 +3,19 @@ require "ratex/version"
 module Ratex
     extend self
 
-    OPERATORS = [:+, :-, :*, :/, :**, :==, :+@, :-@, :<, :>]
-    KLASSES = [Fixnum, String, Symbol]
-
+    #one character constant
     ('A'..'Z').each do |c|
         const_set(c, c)
     end
 
-    class Context
+    class Generator
+
+        OPERATORS = [:+, :-, :*, :/, :**, :==, :+@, :-@, :<, :>]
+        KLASSES = [Fixnum, String, Symbol]
 
         def begin_generate
+            return if @generate_ready
+
             KLASSES.each do |klass|
                 klass.class_eval do
                     OPERATORS.each do |ope|
@@ -52,9 +55,13 @@ module Ratex
                     end
                 end
             end
+
+            @generate_ready = true
         end
 
-        def end_generate
+        def finish_generate
+            return unless @generate_ready
+
             KLASSES.each do |klass|
                 klass.class_eval do
                     OPERATORS.each do |ope|
@@ -65,101 +72,100 @@ module Ratex
                     end
                 end
             end
+
+            @generate_ready = false
         end
 
-        def out_of_calc
-            end_generate
+        def out_of_generate
+            finish_generate
             ret = yield
             begin_generate
             ret
         end
 
-        [:pi, :theta].each do |keyword|
-            define_method(keyword) do
-                "\\#{keyword}"
+        class Context
+
+            def initialize(gen)
+                @gen = gen
             end
-        end
 
-        def sqrt(expr, n = 2)
-            #out_of_calc do
-            end_generate
-                "\\sqrt" + ((n != 2)? "[#{n}]" : "") + "{#{expr.to_s}}"
-            #end
-            begin_generate
-        end
+            #keywords
+            [:pi, :theta].each do |keyword|
+                define_method(keyword) do
+                    "\\#{keyword}"
+                end
+            end
 
-        def sum(init, max, expr)
-            out_of_calc do
+            def sqrt(expr, n = 2)
+                @gen.out_of_generate do
+                    "\\sqrt" + ((n != 2)? "[#{n}]" : "") + "{#{expr.to_s}}"
+                end
+            end
+
+            def sum(init, max, expr)
                 "\\sum^{#{max}}_{#{init}} #{expr}"
             end
-        end
 
-        def fact(expr)
-            "(#{expr})!"
-        end
+            def fact(expr)
+                "(#{expr})!"
+            end
 
-        def b1(expr)
-            "(#{expr})"
-        end
+            def b1(expr)
+                "(#{expr})"
+            end
 
-        def b2(expr)
-            "{#{expr}}"
-        end
+            def b2(expr)
+                "{#{expr}}"
+            end
 
-        def b3(expr)
-            "[#{expr}]"
-        end
+            def b3(expr)
+                "[#{expr}]"
+            end
 
-        [:sin, :cos, :tan].each do |func|
-            define_method(func) do |expr|
-                #out_of_calc do
-                end_generate
+            [:sin, :cos, :tan].each do |func|
+                define_method(func) do |expr|
                     "\\#{func}(#{expr})"
-                #end
-                begin_generate
-            end
-        end
-
-        def [](expr)
-            "[#{expr}]"
-        end
-
-        def method_missing(name, *args)
-            #out_of_calc do
-            begin
-                end_generate
-            rescue SystemStackError
-                puts name
-                puts $!
-                puts caller[0..100]
-                raise 10
-            end
-                ret = name.to_s
-
-                if args.size != 0
-                    ret << "(#{args.join(', ')})"
                 end
+            end
 
-                ret.instance_eval do
-                    def [](index)
-                        "#{self}_{#{index}}"
+            def [](expr)
+                "[#{expr}]"
+            end
+
+            def method_missing(name, *args)
+                @gen.out_of_generate do
+                    ret = name.to_s
+
+                    if args.size != 0
+                        ret << "(#{args.join(', ')})"
                     end
-                end
 
-                ret
-            #end
+                    ret.instance_eval do
+                        def [](index)
+                            "#{self}_{#{index}}"
+                        end
+                    end
+
+                    ret
+                end
+            end
+        end
+
+        def generate(&block)
             begin_generate
+
+            context = Context.new(self)
+            ret = context.instance_eval(&block).to_s
+
+            finish_generate
+
+            ret
         end
     end
 
     def generate(&block)
-        begin_generate
+        gen = Generator.new
 
-        context = Context.new
-        ret = context.instance_eval(&block).to_s
-        
-        end_generate
-        
-        "$$" + ret + "$$"
+        "$$#{gen.generate(&block)}$$"
     end
 end
